@@ -1,0 +1,283 @@
+---
+title: "Study1_Anlysis"
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+```{r}
+#| message: False
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(rstatix)
+library(chisq.posthoc.test)
+
+```
+
+```{r}
+original_all <- read_excel("~/Desktop/PSY THESIS/Study 1/dataset/comprehensive_shortfrom.xlsx")
+love <- read_excel("~/Desktop/PSY THESIS/Study 1/dataset/love_final_notext.xlsx")
+gratitude <- read_excel("~/Desktop/PSY THESIS/Study 1/dataset/gratitude_final_notext.xlsx")
+
+```
+
+
+```{r}
+
+original_all |>
+  summarize(mean_age = mean(age),
+            sd_age = sd(age),
+            min_age = min(age),
+            max_age = max(age))
+
+
+original_all |>
+  group_by(country) |>
+  summarize(mean_age = mean(age),
+            sd_age = sd(age),
+            min_age = min(age),
+            max_age = max(age))
+
+
+```
+```{r}
+original_all |>
+  summarise(prop_table = prop.table(table(gender)))
+
+original_all |>
+  group_by(country) |>
+  summarise(prop_table = prop.table(table(gender)))
+
+#female male other 
+
+original_all |>
+  group_by(country) |>
+  count(gender)
+```
+
+```{r}
+original_all |>
+  summarise(prop_table = prop.table(table(religion2)))
+
+original_all |>
+  count(religion2)
+
+original_all |>
+  group_by(country) |>
+  summarise(prop_table = prop.table(table(religion2)))
+
+original_all |>
+  group_by(country) |>
+  count(religion2) |>
+  arrange()
+```
+```{r}
+
+original_all |>
+  summarise(mean_religiosity = mean(religiosity),
+            sd_religiosity = sd(religiosity),
+            min_religiosity = min(religiosity),
+            max_religiosity = max(religiosity))
+
+original_all |>
+  group_by(country) |>
+  summarise(mean_religiosity = mean(religiosity),
+            sd_religiosity = sd(religiosity),
+            min_religiosity = min(religiosity),
+            max_religiosity = max(religiosity))
+```
+
+```{r}
+
+original_all |>
+  summarise(prop_table = prop.table(table(education1))) |>
+  arrange(desc(prop_table))
+
+orginal_all|>
+  count(education1) |>
+  arrange()
+
+original_all |>
+  group_by(country) |>
+  summarise(prop_table = prop.table(table(education1))) |>
+  arrange(country, desc(prop_table))
+
+original_all |>
+  group_by(country) |>
+  count(education1) |>
+  arrange()
+```
+```{r}
+original_all |>
+  summarise(prop_table = prop.table(table(education2))) |>
+  arrange(desc(prop_table))
+
+orginal_all|>
+  count(education2) |>
+  arrange()
+
+original_all |>
+  group_by(country) |>
+  summarise(prop_table = prop.table(table(education2))) |>
+  arrange(country, desc(prop_table))5
+```
+```{r}
+
+
+count_education <- original_all |>
+  filter(str_detect(education1, regex("college|degree", ignore_case = TRUE)) |
+         str_detect(education2, regex("college|degree", ignore_case = TRUE))) 
+
+count_education |>
+  group_by(country) |>
+  summarise(count = n())
+
+
+```
+
+```{r}
+
+original_all |>
+  na.omit(original_all$SES) |>
+  summarize(mean_age = mean(SES),
+            sd_SES = sd(SES),
+            min_SES = min(SES),
+            max_SES = max(SES))
+
+original_all |>
+  na.omit(original_all$SES) |>
+  group_by(country) |>
+  summarize(mean_age = mean(SES),
+            sd_SES = sd(SES),
+            min_SES = min(SES),
+            max_SES = max(SES))
+
+original_all |>
+  group_split(country) |>
+  lapply(function(group) summary(group$SES))
+
+```
+```{r}
+
+love$country <- as.factor(love$country)
+love$code <- as.factor(love$code)
+love$negativity <- as.factor(love$negativity)
+
+gratitude$country <- as.factor(gratitude$country)
+gratitude$code <- as.factor(gratitude$code)
+gratitude$negativity <- as.factor(gratitude$negativity)
+
+```
+
+```{r}
+love |>
+  filter(code %in% names(table(code))[table(code) >= 10]) |>
+  group_by(country, code) |>
+  summarise(n = n())
+
+love |>
+  group_by(country, code) |>
+  summarise(n = n())
+```
+```{r}
+
+gratitude |>
+  filter(code %in% names(table(code))[table(code) >= 10]) |>
+  group_by(country, code) |>
+  summarise(n = n())
+
+
+gratitude |>
+  group_by(country, code) |>
+  summarise(n = n())
+```
+
+```{r}
+# Create a matrix with the provided data
+data_love <- matrix(c(52, 50, 53,
+                      6, 15, 8,
+                      41, 52, 17,
+                      7, 15, 6,
+                      25, 16, 34,
+                      23, 42, 17,
+                      18, 2, 33,
+                      26, 8, 26), 
+               ncol = 3, 
+               byrow = TRUE)
+
+# Assign row and column names
+row_names_love <- c("Romantic Affection", "Emotional Comfort and Support", 
+               "Parental Love", "Appreciation and Graciousness", 
+               "Family Connectedness", "Care and Thoughtfulness", 
+               "Intimacy and Closeness", "Other")
+col_names_love <- c("U.S.", "China", "Chile")
+colnames(data_love) <- col_names_love
+rownames(data_love) <- row_names_love
+
+# Create the contingency table
+contingency_table_love <- as.table(data_love)
+contingency_table_love
+
+```
+```{r}
+chi_love <- chisq.test(contingency_table_love)
+
+chi_love
+```
+```{r}
+
+chisq.posthoc.test(contingency_table_love, method = "bonferroni")
+
+#parental love
+#care and houghtfulness
+#intimacy and closeness
+
+
+```
+
+```{r}
+data_gratitude <- matrix(c(4,4,17,
+                           18, 25, 13,
+                           41, 59, 44,
+                           49, 32, 44, 
+                           9, 29, 5,
+                           3, 37, 5, 
+                           25, 1, 25, 
+                           49, 13, 41), 
+               ncol = 3, 
+               byrow = TRUE)
+
+# Assign row and column names
+row_names_gratitude <- c( "Emotional Comfort and Support", 
+               "Parental Love", "Appreciation and Graciousness", 
+                "Care and Thoughtfulness", "Acknowledgment and Recognition",
+               "Guidance and Inspiration", "Piride and Accomplishment", "Other")
+col_names_gratitude <- c("U.S.", "China", "Chile")
+colnames(data_gratitude) <- col_names_gratitude
+rownames(data_gratitude) <- row_names_gratitude
+
+# Create the contingency table
+contingency_table_gratitude <- as.table(data_gratitude)
+contingency_table_gratitude
+```
+```{r}
+
+chi_gratitude <- chisq.test(contingency_table_gratitude)
+
+chi_gratitude
+
+```
+
+```{r}
+chisq.posthoc.test(contingency_table_gratitude, method = "bonferroni")
+
+#emotional comfort and support
+#acknowledgement and recognition 
+#guidance and inspiration 
+#pride and accomplishment 
+
+```
+

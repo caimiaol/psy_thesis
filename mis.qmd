@@ -1,0 +1,40 @@
+---
+title: "mis"
+format: html
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+library(tidyr)
+library(ggplot2)
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+```{r}
+# Define the data
+group1 <- c(35, 64)  # 6 positive, 93 negative
+group2 <- c(46, 54) # 15 positive, 85 negative
+group3 <- c(17, 80)  # 8 positive, 89 negative
+
+# Combine the data into a matrix
+data <- rbind(group1, group2, group3)
+rownames(data) <- c("Group 1", "Group 2", "Group 3")
+
+# Run the chi-square test
+chisq.test(data)
+```
