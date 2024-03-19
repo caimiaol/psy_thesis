@@ -2,8 +2,6 @@
 title: "Study1_Anlysis"
 ---
 
-## Quarto
-
 Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
 
 ```{r}
@@ -17,6 +15,8 @@ library(chisq.posthoc.test)
 
 ```
 
+# **Read Datasets**
+
 ```{r}
 original_all <- read_excel("~/Desktop/PSY THESIS/Study 1/dataset/comprehensive_shortfrom.xlsx")
 love <- read_excel("~/Desktop/PSY THESIS/Study 1/dataset/love_final_notext.xlsx")
@@ -24,6 +24,7 @@ gratitude <- read_excel("~/Desktop/PSY THESIS/Study 1/dataset/gratitude_final_no
 
 ```
 
+# **Descriptives**
 
 ```{r}
 
@@ -43,6 +44,7 @@ original_all |>
 
 
 ```
+
 ```{r}
 original_all |>
   summarise(prop_table = prop.table(table(gender)))
@@ -74,6 +76,7 @@ original_all |>
   count(religion2) |>
   arrange()
 ```
+
 ```{r}
 
 original_all |>
@@ -96,7 +99,7 @@ original_all |>
   summarise(prop_table = prop.table(table(education1))) |>
   arrange(desc(prop_table))
 
-orginal_all|>
+original_all|>
   count(education1) |>
   arrange()
 
@@ -110,20 +113,23 @@ original_all |>
   count(education1) |>
   arrange()
 ```
+
 ```{r}
+
 original_all |>
   summarise(prop_table = prop.table(table(education2))) |>
   arrange(desc(prop_table))
 
-orginal_all|>
+original_all|>
   count(education2) |>
   arrange()
 
 original_all |>
   group_by(country) |>
   summarise(prop_table = prop.table(table(education2))) |>
-  arrange(country, desc(prop_table))5
+  arrange(country, desc(prop_table))
 ```
+
 ```{r}
 
 
@@ -160,6 +166,9 @@ original_all |>
   lapply(function(group) summary(group$SES))
 
 ```
+
+# Create Contingency Tables 
+
 ```{r}
 
 love$country <- as.factor(love$country)
@@ -182,6 +191,7 @@ love |>
   group_by(country, code) |>
   summarise(n = n())
 ```
+
 ```{r}
 
 gratitude |>
@@ -194,6 +204,8 @@ gratitude |>
   group_by(country, code) |>
   summarise(n = n())
 ```
+
+## Chi Square: Love
 
 ```{r}
 # Create a matrix with the provided data
@@ -222,11 +234,15 @@ contingency_table_love <- as.table(data_love)
 contingency_table_love
 
 ```
+
 ```{r}
 chi_love <- chisq.test(contingency_table_love)
 
 chi_love
 ```
+
+### Post-hoc
+
 ```{r}
 
 chisq.posthoc.test(contingency_table_love, method = "bonferroni")
@@ -237,6 +253,8 @@ chisq.posthoc.test(contingency_table_love, method = "bonferroni")
 
 
 ```
+
+## Chi Square: Gratitude 
 
 ```{r}
 data_gratitude <- matrix(c(4,4,17,
@@ -263,6 +281,7 @@ rownames(data_gratitude) <- row_names_gratitude
 contingency_table_gratitude <- as.table(data_gratitude)
 contingency_table_gratitude
 ```
+
 ```{r}
 
 chi_gratitude <- chisq.test(contingency_table_gratitude)
@@ -270,6 +289,8 @@ chi_gratitude <- chisq.test(contingency_table_gratitude)
 chi_gratitude
 
 ```
+
+### post-hoc
 
 ```{r}
 chisq.posthoc.test(contingency_table_gratitude, method = "bonferroni")
@@ -280,4 +301,3 @@ chisq.posthoc.test(contingency_table_gratitude, method = "bonferroni")
 #pride and accomplishment 
 
 ```
-
