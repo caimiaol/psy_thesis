@@ -12,7 +12,12 @@ library(ggplot2)
 library(tidyverse)
 library(rstatix)
 library(chisq.posthoc.test)
-
+library(gridExtra)
+library(reshape2)
+library(cowplot)
+library(ggsignif)
+library(extrafont)
+library(ggpubr)
 ```
 
 # **Read Datasets**
@@ -167,7 +172,7 @@ original_all |>
 
 ```
 
-# Create Contingency Tables 
+# Create Contingency Tables
 
 ```{r}
 
@@ -248,13 +253,13 @@ chi_love
 chisq.posthoc.test(contingency_table_love, method = "bonferroni")
 
 #parental love
-#care and houghtfulness
+#care and thoughtfulness
 #intimacy and closeness
 
 
 ```
 
-## Chi Square: Gratitude 
+## Chi Square: Gratitude
 
 ```{r}
 data_gratitude <- matrix(c(4,4,17,
@@ -301,3 +306,87 @@ chisq.posthoc.test(contingency_table_gratitude, method = "bonferroni")
 #pride and accomplishment 
 
 ```
+
+# Visualization 
+
+```{r}
+pastel_palette <- c("#B6D6F2", "#B6E2D2","#FFC5A1")
+```
+
+```{r}
+proportions_love <- prop.table(contingency_table_love)
+
+n_love <- sum(contingency_table_love) 
+se_love <- sqrt(proportions_love * (1 - proportions_love) / n_love)
+
+se_love
+
+proportions_love
+
+```
+
+```{r}
+Visual_Love <- read_excel("~/Desktop/PSY THESIS/Study 1/dataset/LoveGratitude_Study1_VisualizationLove.xlsx")
+
+Visual_Love$country <- factor(Visual_Love$country, levels = c("U.S.", "China", "Chile"))
+
+visual_love_diff <- Visual_Love |>
+  filter(Sig == "Y")
+
+visual_love_diff$theme <- factor(visual_love_diff$theme, 
+                                 levels = c("Parental Love", "Care and Thoughtfulness", "Intimacy and Closeness"))
+
+visual_love_sim <- Visual_Love |>
+  filter(Sig == "N")
+
+loadfonts()
+```
+
+```{r}
+
+ggplot(visual_love_diff, aes(x = theme, y = response, fill = country)) +
+  geom_bar(stat = "identity", position = position_dodge2(preserve = "single", width = 0.9) )+
+  geom_errorbar(aes(ymin = response - std_error, ymax = response + std_error),
+                size = 0.5, width = 0.2, position = position_dodge(0.9), color = "#333333") +
+  labs(x = "", y = "Frequency", fill = "Country") +
+  facet_wrap(~ theme, nrow = 1, scales = "free_x") +
+  theme_minimal() +
+  ylim(0, 0.11) +
+  scale_fill_manual(values = pastel_palette) +
+  theme(
+  strip.text = element_blank(),
+  strip.background = element_blank(),
+  axis.text.x = element_text(color = "black", size = 11),
+  axis.title.y = element_text(color = "black", size = 12),
+  legend.position = "bottom",
+  legend.box = "horizontal")+
+  labs(y = "Frequency of Report",
+       fill = "") +
+  ggtitle("Love") +
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```
+
+```{r}
+ggplot(visual_love_diff, aes(x = theme, y = response, fill = country)) +
+  geom_bar(stat = "identity", position = position_dodge2(preserve = "single", width = 0.9) )+
+  geom_errorbar(aes(ymin = response - std_error, ymax = response + std_error),
+                size = 0.5, width = 0.2, position = position_dodge(0.9), color = "#333333") +
+  labs(x = "", y = "Frequency", fill = "Country") +
+  facet_wrap(~ theme, nrow = 1, scales = "free_x") +
+  theme_minimal() +
+  ylim(0, 0.11) +
+  scale_fill_manual(values = pastel_palette) +
+  theme(
+  strip.text = element_blank(),
+  strip.background = element_blank(),
+  axis.text.x = element_text(color = "black", size = 11, family = "Calibri"),
+  axis.title.y = element_text(color = "black", size = 12, family = "Calibri"),
+  legend.position = "bottom",
+  legend.box = "horizontal",
+  legend.text = element_text(family = "Calibri"))+
+  labs(y = "Frequency of Report",
+       fill = "") +
+  ggtitle("Love") +
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold", family = "Calibri"))
+```
+
