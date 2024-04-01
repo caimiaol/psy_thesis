@@ -214,20 +214,19 @@ gratitude |>
 
 ```{r}
 # Create a matrix with the provided data
-data_love <- matrix(c(52, 50, 53,
+data_love <- matrix(c(52, 40, 53,
                       6, 15, 8,
                       41, 52, 17,
-                      7, 15, 6,
                       25, 16, 34,
                       23, 42, 17,
                       18, 2, 33,
-                      26, 8, 26), 
+                      33, 33, 32), 
                ncol = 3, 
                byrow = TRUE)
 
 # Assign row and column names
 row_names_love <- c("Romantic Affection", "Emotional Comfort and Support", 
-               "Parental Love", "Appreciation and Graciousness", 
+               "Parental Love", 
                "Family Connectedness", "Care and Thoughtfulness", 
                "Intimacy and Closeness", "Other")
 col_names_love <- c("U.S.", "China", "Chile")
@@ -262,19 +261,19 @@ chisq.posthoc.test(contingency_table_love, method = "bonferroni")
 ## Chi Square: Gratitude
 
 ```{r}
-data_gratitude <- matrix(c(4,4,17,
+data_gratitude <- matrix(c(
                            18, 25, 13,
                            41, 59, 44,
                            49, 32, 44, 
                            9, 29, 5,
                            3, 37, 5, 
                            25, 1, 25, 
-                           49, 13, 41), 
+                           53, 17, 58), 
                ncol = 3, 
                byrow = TRUE)
 
 # Assign row and column names
-row_names_gratitude <- c( "Emotional Comfort and Support", 
+row_names_gratitude <- c( 
                "Parental Love", "Appreciation and Graciousness", 
                 "Care and Thoughtfulness", "Acknowledgment and Recognition",
                "Guidance and Inspiration", "Piride and Accomplishment", "Other")
@@ -307,11 +306,13 @@ chisq.posthoc.test(contingency_table_gratitude, method = "bonferroni")
 
 ```
 
-# Visualization 
+# Visualization
 
 ```{r}
 pastel_palette <- c("#B6D6F2", "#B6E2D2","#FFC5A1")
 ```
+
+## love table
 
 ```{r}
 proportions_love <- prop.table(contingency_table_love)
@@ -324,7 +325,7 @@ se_love
 proportions_love
 
 ```
-
+##se calculation 
 ```{r}
 Visual_Love <- read_excel("~/Desktop/PSY THESIS/Study 1/dataset/LoveGratitude_Study1_VisualizationLove.xlsx")
 
@@ -342,9 +343,11 @@ visual_love_sim <- Visual_Love |>
 loadfonts()
 ```
 
+##love ggplot 
+
 ```{r}
 
-ggplot(visual_love_diff, aes(x = theme, y = response, fill = country)) +
+love<- ggplot(visual_love_diff, aes(x = theme, y = response, fill = country)) +
   geom_bar(stat = "identity", position = position_dodge2(preserve = "single", width = 0.9) )+
   geom_errorbar(aes(ymin = response - std_error, ymax = response + std_error),
                 size = 0.5, width = 0.2, position = position_dodge(0.9), color = "#333333") +
@@ -356,18 +359,210 @@ ggplot(visual_love_diff, aes(x = theme, y = response, fill = country)) +
   theme(
   strip.text = element_blank(),
   strip.background = element_blank(),
-  axis.text.x = element_text(color = "black", size = 11),
-  axis.title.y = element_text(color = "black", size = 12),
+  axis.text.x = element_text(color = "black", size = 11, family = "Times New Roman"),
+  axis.title.y = element_text(color = "black", size = 12, family = "Times New Roman"),
   legend.position = "bottom",
   legend.box = "horizontal")+
-  labs(y = "Frequency of Report",
+  labs(y = "Proportion of Responses",
        fill = "") +
-  ggtitle("Love") +
-  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+  ggtitle(" ") +
+  theme(plot.title = element_text(hjust = 0.5, size = 16,  face = "bold", family = "Times New Roman")) 
+
+ggsave("gglove.png", love, width = 7, height = 5)
+```
+
+## Gratitude Table 
+
+```{r}
+proportions_gratitude <- prop.table(contingency_table_gratitude)
+
+n_gratitude <- sum(contingency_table_gratitude) 
+se_gratitude <- sqrt(proportions_gratitude * (1 - proportions_gratitude) / n_gratitude)
+
+se_gratitude
+
+proportions_gratitude
+```
+##se calculation
+```{r}
+Visual_gratitude <- read_excel("~/Desktop/PSY THESIS/Study 1/dataset/LoveGratitude_Study1_VisualizationGratitude.xlsx")
+
+Visual_gratitude$country <- factor(Visual_gratitude$country, levels = c("U.S.", "China", "Chile"))
+
+visual_gratitude_diff <- Visual_gratitude |>
+  filter(Sig == "Y")
+
+visual_gratitude_diff$theme <- factor(visual_gratitude_diff$theme, 
+                                 levels = c("Accomplishment and Pride", "Guidance and Inspiration", 
+                                            "Acknowledgement and Recognition"))
+
+visual_gratitude_sim <- Visual_gratitude |>
+  filter(Sig == "N")
+```
+
+## gratitude ggplot 
+
+```{r}
+gratitude <- ggplot(visual_gratitude_diff, aes(x = theme, y = response, fill = country)) +
+  geom_bar(stat = "identity", position = position_dodge2(preserve = "single", width = 0.9) )+
+  geom_errorbar(aes(ymin = response - std_error, ymax = response + std_error),
+                size = 0.5, width = 0.2, position = position_dodge(0.9), color = "#333333") +
+  labs(x = "", y = "Frequency", fill = "Country") +
+  facet_wrap(~ theme, nrow = 1, scales = "free_x") +
+  theme_minimal() +
+  ylim(0, 0.09) +
+  scale_fill_manual(values = pastel_palette) +
+  theme(
+  strip.text = element_blank(),
+  strip.background = element_blank(),
+  axis.text.x = element_text(color = "black", size = 11, family = "Times New Roman"),
+  axis.title.y = element_text(color = "black", size = 12, family = "Times New Roman"),
+  legend.position = "bottom",
+  legend.box = "horizontal")+
+  labs(y = "Proportion of Responses",
+       fill = "") +
+  ggtitle(" ") +
+  theme(plot.title = element_text(hjust = 0.5, size = 16,  face = "bold", family = "Times New Roman")) 
+
+ggsave("gggratitude.png", gratitude, width = 7.6, height = 5)
+```
+#Positivity vs. Negativity 
+
+##love
+```{r}
+love$negativity <- as.factor(love$negativity)
+love$country <- as.factor(love$country)
+
+contingency_table_neg_love <- table(love$negativity, love$country)
+
+print(contingency_table_neg_love)
 ```
 
 ```{r}
-ggplot(visual_love_diff, aes(x = theme, y = response, fill = country)) +
+chi_neg_love <- chisq.test(contingency_table_neg_love)
+
+chi_neg_love
+
+```
+```{r}
+chisq.posthoc.test(contingency_table_neg_love, method = "bonferroni")
+```
+
+
+## gratitude
+
+```{r}
+gratitude$negativity <- as.factor(gratitude$negativity)
+gratitude$country <- as.factor(gratitude$country)
+
+contingency_table_neg_gratitude <- table(gratitude$negativity, gratitude$country)
+
+print(contingency_table_neg_gratitude)
+
+```
+
+```{r}
+chi_neg_gratitude <- chisq.test(contingency_table_neg_gratitude)
+
+chi_neg_gratitude
+```
+
+```{r}
+chisq.posthoc.test(contingency_table_neg_gratitude, method = "bonferroni")
+```
+
+## visualization 
+```{r}
+
+data_love_negativity <- matrix(c(
+                           23, 65, 21,
+                           175, 135, 173), 
+               ncol = 3, 
+               byrow = TRUE)
+
+# Assign row and column names
+row_names_love_negativity <- c( 
+               "Love_1", "Love_0")
+col_names_love_negativity <- c("U.S.", "China", "Chile")
+colnames(data_love_negativity) <- col_names_love_negativity
+rownames(data_love_negativity) <- row_names_love_negativity
+
+# Create the contingency table
+contingency_table_love_negativity <- as.table(data_love_negativity)
+contingency_table_love_negativity
+
+data_gratitude_negativity <- matrix(c(
+                           39, 94, 62,  
+                           159, 106, 132), 
+               ncol = 3, 
+               byrow = TRUE)
+
+row_names_gratitude_negativity <- c( 
+               "Gratitude_1", "Gratitude_0")
+col_names_gratitude_negativity <- c("U.S.", "China", "Chile")
+colnames(data_gratitude_negativity) <- col_names_gratitude_negativity
+rownames(data_gratitude_negativity) <- row_names_gratitude_negativity
+
+# Create the contingency table
+contingency_table_gratitude_negativity <- as.table(data_gratitude_negativity)
+contingency_table_gratitude_negativity
+```
+
+```{r}
+proportions_love_negativity <- prop.table(contingency_table_love_negativity)
+
+n_love_negativity <- sum(contingency_table_love_negativity) 
+se_love_negativity <- sqrt(proportions_love_negativity * (1 - proportions_love_negativity) / n_love_negativity)
+
+se_love_negativity
+
+proportions_love_negativity
+
+```
+```{r}
+proportions_gratitude_negativity <- prop.table(contingency_table_gratitude_negativity)
+
+n_gratitude_negativity <- sum(contingency_table_gratitude_negativity) 
+se_gratitude_negativity <- sqrt(proportions_gratitude_negativity * (1 - proportions_gratitude_negativity) / n_gratitude_negativity)
+
+se_gratitude_negativity
+
+proportions_gratitude_negativity
+```
+
+```{r}
+visual_negativity <- read_excel("~/Desktop/PSY THESIS/Study 1/dataset/visual_negativity.xlsx")
+
+```
+
+```{r}
+negativity <- ggplot(visual_negativity, aes(x = emotion, y = response, fill = Country)) +
+  geom_bar(stat = "identity", position = position_dodge2(preserve = "single", width = 0.9) )+
+  geom_errorbar(aes(ymin = response - std_error, ymax = response + std_error),
+                size = 0.5, width = 0.2, position = position_dodge(0.9), color = "#333333") +
+  labs(x = "", y = "Frequency", fill = "Country") +
+  facet_wrap(~ emotion, nrow = 1, scales = "free_x") +
+  theme_minimal() +
+  ylim(0, 0.20) +
+  scale_fill_manual(values = pastel_palette) +
+  theme(
+  strip.text = element_blank(),
+  strip.background = element_blank(),
+  axis.text.x = element_text(color = "black", size = 11),
+  axis.title.y = element_text(color = "black", size = 12),
+  legend.position = "bottom",
+  legend.box = "horizontal",
+  legend.text = element_text( ))+
+  labs(y = " ",
+       fill = "") +
+  ggtitle(" ") +
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+
+ggsave("ggnegativity.png", negativity, width = 7, height = 5)
+```
+
+```{r}
+ggplot(visual_negativity, aes(x = emotion, y = response, fill = country)) +
   geom_bar(stat = "identity", position = position_dodge2(preserve = "single", width = 0.9) )+
   geom_errorbar(aes(ymin = response - std_error, ymax = response + std_error),
                 size = 0.5, width = 0.2, position = position_dodge(0.9), color = "#333333") +
@@ -388,5 +583,5 @@ ggplot(visual_love_diff, aes(x = theme, y = response, fill = country)) +
        fill = "") +
   ggtitle("Love") +
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold", family = "Calibri"))
-```
 
+```
